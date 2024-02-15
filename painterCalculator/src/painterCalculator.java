@@ -11,7 +11,7 @@ public class painterCalculator{
 
     public String getTinsNeeded(){
         if (paintCost == 0){
-            return "No Paint Data";
+            return "No Paint Data!";
         }
         float totalArea = totalArea();
         float totalCoverage = totalArea / wallCoverage;
