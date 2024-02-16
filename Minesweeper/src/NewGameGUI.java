@@ -10,12 +10,21 @@ public class NewGameGUI {
     private GUI currentGame;
     private JFrame frame;
 
-    public NewGameGUI(){
-        frame = new JFrame("New Minesweeper Game");
+    public NewGameGUI(String message){
+        frame = new JFrame(message);
         gridSize = new JTextField("Grid Size (Max " + maxSize + ")");
         mineCount = new JTextField("Mine count");
         JButton startButton = new JButton("Start Game");
         JPanel panel = new JPanel();
+
+        JMenuBar mb = new JMenuBar();
+        JMenuItem gridSizeLabel = new JMenuItem("Grid Size (Max " + maxSize + ")");
+        JMenuItem mineCountLabel = new JMenuItem("Mine count");
+        JMenuItem startLabel = new JMenuItem("");
+        mb.add(gridSizeLabel);
+        mb.add(mineCountLabel);
+        mb.add(startLabel);
+        frame.getContentPane().add(BorderLayout.NORTH, mb);
 
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -24,7 +33,7 @@ public class NewGameGUI {
             }
         });
 
-        frame.setSize(400,75);
+        frame.setSize(400,125);
         panel.setLayout(new java.awt.GridLayout(1, 3));
 
         panel.add(gridSize);
@@ -52,7 +61,7 @@ public class NewGameGUI {
         }
     }
     private boolean sizeCheck(String input){
-        return (Integer.parseInt(input) < maxSize);
+        return (Integer.parseInt(input) <= maxSize);
     }
     private boolean mineCheck(String input1, String input2){
         return (Integer.parseInt(input1) < (Integer.parseInt(input2) * Integer.parseInt(input2)));
