@@ -2,11 +2,13 @@ import java.awt.*;
 
 public class Cell {
     private int row, col;
-    Stone stone;
+    private Stone stone;
+    private boolean scored;
     public Cell (int r, int c){
         row = r;
         col = c;
         stone = null;
+        scored = false;
     }
 
     public void addStone(Color color){
@@ -20,5 +22,11 @@ public class Cell {
     }
     public int[] getLocation(){
         return (new int[]{row, col});
+    }
+    public boolean getScored(){
+        return scored;
+    }
+    public void setScored(){
+        scored = true;
     }
 }

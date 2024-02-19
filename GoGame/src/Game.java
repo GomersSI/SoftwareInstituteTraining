@@ -1,8 +1,5 @@
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -10,9 +7,13 @@ import java.util.ArrayList;
 public class Game extends JPanel{
     // Create Constants.
     private static int SIZE;
+    private int handicap;
     private JLabel score, toPlay;
     private JPanel scorePanel, toPlayPanel;
     private JButton passButton, restartButton;
+    JPanel handicapPanel;
+    JLabel handicapLabel;
+    JTextField handicapField;
     private boolean passed, gameOver;
     private int whiteScore, blackScore, whiteStones, blackStones;
     public static final int TILE_SIZE = 40;
@@ -22,6 +23,7 @@ public class Game extends JPanel{
     private Cell[][] grid;
 
     public Game(int boardSize){
+        handicap = 0;
         SIZE = boardSize;
         // Set up graphics.
         graphicsInit();
@@ -40,7 +42,7 @@ public class Game extends JPanel{
                         / TILE_SIZE);
 
                 // DEBUG INFO
-                System.out.println(String.format("y: %d, x: %d", row, col));
+                System.out.printf("y: %d, x: %d%n", row, col);
 
                 // Check wherever it's valid.
                 if (row >= SIZE || col >= SIZE || row < 0 || col < 0) {
@@ -73,7 +75,24 @@ public class Game extends JPanel{
             }
         });
     }
+    private void calculateScore(){
+        for (int row = 0; row < SIZE; row++){
+            for (int col = 0; row < SIZE; row++){
+                Cell currentCell = grid[row][col];
+                Color seenfirst;
+                if (currentCell.getStone() == null){
+                    currentCell.setScored();
+                }
+            }
+        }
+    }
     private void restart(){
+        try {
+            handicap = Integer.parseInt(handicapField.getText());
+        }catch(Exception e){
+            // DEBUG INFO
+            System.out.println("Invalid handicap");
+        };
         // Set up variables.
         whiteScore = 0;
         passed = false;
@@ -90,10 +109,13 @@ public class Game extends JPanel{
         repaint();
     }
     private void turnPlayed(){
-        whiteToMove = !whiteToMove;
+        if (handicap <= 0){
+            whiteToMove = !whiteToMove;
+        }
+        handicap--;
     }
     private void updateText(){
-        score.setText("White score : " + (whiteScore + whiteStones) + " Black score : " + (blackScore + blackStones));
+        score.setText("White score : " + (whiteScore) + " Black score : " + (blackScore));
         if (gameOver) {
             toPlay.setText("Game over!");
         }
@@ -108,6 +130,9 @@ public class Game extends JPanel{
     private void graphicsInit(){
         scorePanel = new JPanel();
         toPlayPanel = new JPanel();
+        handicapPanel = new JPanel();
+        handicapLabel = new JLabel("Handicap : ");
+        handicapField = new JTextField("" , 5);
         passButton = new JButton("Pass");
         restartButton = new JButton("Restart");
         score = new JLabel("White score : " + whiteScore + " Black score : " + blackScore);
@@ -115,25 +140,18 @@ public class Game extends JPanel{
 
         scorePanel.add(score);
         toPlayPanel.add(toPlay);
+        handicapPanel.add(handicapLabel);
+        handicapPanel.add(handicapField);
         super.add(restartButton);
         super.add(scorePanel);
         super.add(toPlayPanel);
         super.add(passButton);
+        super.add(handicapPanel);
 
         this.setBackground(Color.getHSBColor(30, 81, 62));
 
-        passButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                passButtonClicked();
-            }
-        });
-        restartButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                restart();
-            }
-        });
+        passButton.addActionListener(e -> passButtonClicked());
+        restartButton.addActionListener(e -> restart());
     }
     private void passButtonClicked(){
         if (passed){
@@ -156,7 +174,7 @@ public class Game extends JPanel{
                     else{
                         whiteStones += 1;
                     }
-                    ArrayList<Cell> neighbors = new ArrayList<Cell>();
+                    ArrayList<Cell> neighbors = new ArrayList<>();
                     // Don't check outside the board
                     if (row > 0) {
                         neighbors.add(grid[row - 1][col]);
