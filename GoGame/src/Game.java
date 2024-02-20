@@ -18,6 +18,10 @@ public class Game extends JPanel{
     private int whiteScore, blackScore, whiteStones, blackStones;
     public static final int TILE_SIZE = 40;
     public static final int BORDER_SIZE = TILE_SIZE;
+
+    private Color seenfirst = null;
+    private boolean toScore = true;
+    private ArrayList<Cell> connectedEmptyCells = new ArrayList<>();
     // Create private variables.
     boolean whiteToMove;
     private Cell[][] grid;
@@ -75,13 +79,79 @@ public class Game extends JPanel{
             }
         });
     }
+    private void resetScored(){
+        for (int row = 0; row < SIZE; row++) {
+            for (int col = 0; col < SIZE; col++) {
+                Cell currentCell = grid[row][col];
+                currentCell.resetScored();
+            }
+        }
+    }
     private void calculateScore(){
         for (int row = 0; row < SIZE; row++){
-            for (int col = 0; row < SIZE; row++){
+            for (int col = 0; col < SIZE; col++){
                 Cell currentCell = grid[row][col];
-                Color seenfirst;
-                if (currentCell.getStone() == null){
+                resetScored();
+                if (currentCell.getStone() == null && !currentCell.getScored()){
+                    connectedEmptyCells = new ArrayList<>();
+                    seenfirst = null;
+                    toScore = true;
                     currentCell.setScored();
+                    if (!currentCell.getScoredPoint()) {
+                        connectedEmptyCells.add(currentCell);
+                    }
+                    checkAdjacent(row, col);
+                    if (toScore){
+                        if (seenfirst == Color.BLACK){
+                            blackScore += connectedEmptyCells.size();
+                        }
+                        else if (seenfirst == Color.WHITE){
+                            whiteScore += connectedEmptyCells.size();
+                        }
+                        setScoredPoint();
+                    }
+                }
+            }
+        }
+    }
+    private void setScoredPoint(){
+        for (Cell cell: connectedEmptyCells){
+            cell.setScoredPoint();
+        }
+    }
+    private void checkAdjacent(int row, int col){
+        ArrayList<Cell> neighbors = new ArrayList<>();
+        // Don't check outside the board
+        if (row > 0) {
+            neighbors.add(grid[row - 1][col]);
+        }
+        if (row < SIZE - 1) {
+            neighbors.add(grid[row + 1][col]);
+        }
+        if (col > 1) {
+            neighbors.add(grid[row][col - 1]);
+        }
+        if (col < SIZE - 1) {
+            neighbors.add(grid[row][col + 1]);
+        }
+        for (Cell cell: neighbors){
+            if (cell.getStone() == null){
+                if (cell.getScored()) {
+                    continue;
+                }
+                cell.setScored();
+                if (!cell.getScoredPoint()) {
+                    connectedEmptyCells.add(cell);
+                }
+                checkAdjacent(cell.getLocation()[0], cell.getLocation()[1]);
+            }
+            else{
+                if (seenfirst == null){
+                    seenfirst = cell.getStone().getColor();
+                    continue;
+                }
+                if (cell.getStone().getColor() != seenfirst){
+                    toScore = false;
                 }
             }
         }
@@ -117,6 +187,8 @@ public class Game extends JPanel{
     private void updateText(){
         score.setText("White score : " + (whiteScore) + " Black score : " + (blackScore));
         if (gameOver) {
+            calculateScore();
+            score.setText("White score : " + (whiteScore) + " Black score : " + (blackScore));
             toPlay.setText("Game over!");
         }
         else if (whiteToMove){
@@ -154,6 +226,9 @@ public class Game extends JPanel{
         restartButton.addActionListener(e -> restart());
     }
     private void passButtonClicked(){
+        if (gameOver){
+            return;
+        }
         if (passed){
             gameOver = true;
         }

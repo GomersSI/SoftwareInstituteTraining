@@ -4,6 +4,7 @@ public class Cell {
     private boolean isBomb;
     private int adjacentBombs;
     public Cell(){
+
         flipped = false;
         flagged = false;
         isBomb = false;

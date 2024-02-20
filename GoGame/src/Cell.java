@@ -4,11 +4,13 @@ public class Cell {
     private int row, col;
     private Stone stone;
     private boolean scored;
+    private boolean scoredPoint;
     public Cell (int r, int c){
         row = r;
         col = c;
         stone = null;
         scored = false;
+        scoredPoint = false;
     }
 
     public void addStone(Color color){
@@ -29,4 +31,7 @@ public class Cell {
     public void setScored(){
         scored = true;
     }
+    public void resetScored(){scored = false;}
+    public void setScoredPoint(){scoredPoint = true;}
+    public boolean getScoredPoint(){return scoredPoint;}
 }
